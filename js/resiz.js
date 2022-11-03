@@ -27,8 +27,8 @@ class resizeBox {
     this.resizable_bar_y = []; // vertical bar
 
     this.create_layout(layout);
-    // console.log(this.boxes);
-    // console.log(this.handle);
+    console.log(this.boxes);
+    console.log(this.handle);
 
     // check if the layout is valid.
     if (!this.checkIsValidCorners(this.boxes))
@@ -51,48 +51,8 @@ class resizeBox {
     // container.style.flexDirection = 'row';
     // container.style.flexWrap = 'wrap';
 
-    // create resizable bars
-    // for(let i = 1; i < this.main_axis_y; i++){
-    //     const box = document.createElement('div');
-    //     box.classList.add('resizable-bar');
-    //     console.log(this.thickness_bar);
-    //     box.style.width = this.thickness_bar;
-    //     box.style.height = this.height;
-    //     box.style.position = 'absolute';
-    //     box.style.top = '0px';
-    //     box.style.left = i * width_boxes + 'px';
-    //     box.style.cursor = 'col-resize';
-    //     box.style.zIndex = '3';
-    //     box.style.backgroundColor = '#fff';
-    //     box.style.opacity = '0.5';
-    //     // translate(-50%, 0);
-    //     box.style.transform = 'translate(-50%, 0)';
-    //     container.appendChild(box);
-    //     this.resizable_bar_x.push(box);
-    // }
-
-    // for(let i = 1; i < this.main_axis_x; i++){
-    //     const box = document.createElement('div');
-    //     box.classList.add('resizable-bar');
-    //     box.style.width = this.width;
-    //     box.style.height = this.thickness_bar;
-    //     box.style.position = 'absolute';
-    //     box.style.top = i * height_boxes + 'px';
-    //     box.style.left = '0px';
-    //     box.style.cursor = 'row-resize';
-    //     box.style.zIndex = '3';
-    //     box.style.backgroundColor = '#fff';
-    //     box.style.opacity = '0.5';
-    //     // translate(-50%, 0);
-    //     box.style.transform = 'translateY(-50%)';
-    //     container.appendChild(box);
-    //     this.resizable_bar_y.push(box);
-    // }
-
     // create resizable boxes
     Object.keys(this.boxes).forEach((key, index) => {
-      console.log("this.boxes");
-      console.log(this.boxes[key]);
       let box = document.createElement("div");
       box.classList.add("box");
       box.classList.add("resize-box");
@@ -109,7 +69,7 @@ class resizeBox {
       box.style.borderRadius = "5px";
       // box.style.boxShadow = '0px 0px 5px #' + Math.floor(Math.random() * 16777215).toString(16);
       box.style.zIndex = "1";
-      box.style.cursor = "pointer";
+      // box.style.cursor = "pointer";
       // box.style.transition = 'all 0.5s';
       // box.style.transform = 'translate(-50%, -50%)';
       // box.style.transformOrigin = '50% 50%';
@@ -117,6 +77,53 @@ class resizeBox {
 
       container.appendChild(box);
     });
+
+    // create resizable bars
+    Object.keys(this.handle).forEach(key => {
+      this.handle[key].forEach((handler, index) => {
+        let bar = document.createElement('div');
+        bar.classList.add("resize-bar");
+        bar.classList.add(key);
+        bar.style.position = 'absolute';
+        bar.style.zIndex = '2';
+        bar.style.backgroundColor = '#444';
+        // bar.style.borderRadius = 'px';
+        bar.style.cursor = 'pointer';
+        bar.style.transition = 'all 0.5s';
+        // bar.style.transformOrigin = '50% 50%';
+        
+        console.log(handler);
+        if (key == 'xAxis') {
+          bar.style.transform = 'translate(0, -50%)';
+          let top = handler.boundrie[0][1] * height_boxes;
+          let left = handler.boundrie[0][0] * width_boxes;
+          let width = (handler.boundrie[1][1] - handler.boundrie[0][1]) * width_boxes;
+          // let height = parseInt(this.thickness_bar.split('px')[0]);
+          let height = 10;
+
+          bar.style.top = top + 'px';
+          bar.style.left = left + 'px';
+          bar.style.width = width + 'px';
+          bar.style.height = height + 'px';
+        }
+
+        if (key == 'yAxis') {
+          bar.style.transform = 'translate(-50%, 0)';
+          let top = handler.boundrie[0][0] * height_boxes;
+          let left = handler.boundrie[0][1] * width_boxes;
+          let width = 10;
+          let height = (handler.boundrie[1][0] - handler.boundrie[0][0]) * height_boxes;
+
+          bar.style.top = top + 'px';
+          bar.style.left = left + 'px';
+          bar.style.width = width + 'px';
+          bar.style.height = height + 'px';
+        }
+
+        container.appendChild(bar);
+      });
+    });
+
 
     document.querySelector("#test").appendChild(container);
   }
@@ -155,7 +162,10 @@ class resizeBox {
     // STEP 1:
     // - Create a matrix with the layout.
     const boxes = {};
-    const handle = {};
+    const handle = {
+      xAxis: [], // horizontal bar  --> yAxis: [{ boundrie: [[1,1],[1,3]], containers: [0, 'a', 'b']}, {...} ]
+      yAxis: [], // vertical bar    --> xAxis: [{ boundrie: [[1,1],[3,1]], containers: [0, 'a', 'b']}, {...} ]
+    };
     this.main_axis_x = layout.length;
     this.main_axis_y = layout[0].length;
 
@@ -181,11 +191,87 @@ class resizeBox {
       );
 
       boxes[box_type] = boundries.corners;
-      handle[box_type] = boundries.boundries;
+
+      // console.log(boundries);
+      Object.keys(boundries.boundries).forEach((key) => {
+        if (boundries.boundries[key] && boundries.boundries[key].length > 0) {
+          this.setHandler(handle, boundries.boundries[key], box_type);
+        }
+      });
     });
 
     this.boxes = boxes;
     this.handle = handle;
+  }
+
+  isXAxis(boundrie) {
+    return boundrie[0][0] === boundrie[1][0]; // check if the boundrie is in the x axis. of 2 points
+  }
+
+  setHandler(handlers, boundrie, box_type) {
+    // check if the boundrie is in the x axis. of 2 points
+    const axis = this.isXAxis(boundrie) ? "xAxis" : "yAxis";
+
+    // check if the handler already exists.
+    const handler = handlers[axis].find((handler) => {
+      return (
+        handler.boundrie[0][0] === boundrie[0][0] &&
+        handler.boundrie[0][1] === boundrie[0][1] &&
+        handler.boundrie[1][0] === boundrie[1][0] &&
+        handler.boundrie[1][1] === boundrie[1][1]
+      );
+    });
+
+    // if the handler already exists, return
+    if (handler) {
+      // add container to the handler.
+      handler.containers.push(box_type);
+      return;
+    }
+
+    // in case the handler doesn't exist, check if it's contained
+    const containedBy = handlers[axis].find((handler) => {
+      return (
+        handler.boundrie[0][0] <= boundrie[0][0] &&
+        handler.boundrie[0][1] <= boundrie[0][1] &&
+        handler.boundrie[1][0] >= boundrie[1][0] &&
+        handler.boundrie[1][1] >= boundrie[1][1]
+      );
+    });
+
+    // if the handler is contained, return
+    if (containedBy) {
+      // add container to the handler.
+      containedBy.containers.push(box_type);
+
+      return;
+    }
+
+    // in case the handler is not contained, check if it contains other handlers
+    const contains = handlers[axis].filter((handler) => {
+      return (
+        handler.boundrie[0][0] >= boundrie[0][0] &&
+        handler.boundrie[0][1] >= boundrie[0][1] &&
+        handler.boundrie[1][0] <= boundrie[1][0] &&
+        handler.boundrie[1][1] <= boundrie[1][1]
+      );
+    });
+
+    // if the handler contains other handlers, remove them
+    // first save the containers of the removed handlers
+    const containers = [];
+    if (contains.length > 0) {
+      contains.forEach((handler) => {
+        containers.push(...handler.containers);
+        handlers[axis].splice(handlers[axis].indexOf(handler), 1);
+      });
+    }
+
+    // add the handler to the list
+    handlers[axis].push({
+      boundrie: boundrie,
+      containers: [box_type, ...containers],
+    });
   }
 
   /* ***** getBoundries *****
@@ -334,17 +420,16 @@ const valid_box = new resizeBox(
   [
     [0, "a", "a"],
     [0, "b", "b"],
-    [0, "c", "d"],
   ],
   { width: "600px", height: "500px" }
 );
 
 // Invalid layour
-const invalid_box = new resizeBox(
-  [
-    [0, "a", "a"],
-    [0, "b", "b"],
-    [0, "c", "b"],
-  ],
-  { width: "600px", height: "500px" }
-);
+// const invalid_box = new resizeBox(
+//   [
+//     [0, "a", "a"],
+//     [0, "b", "b"],
+//     [0, "c", "b"],
+//   ],
+//   { width: "600px", height: "500px" }
+// );
