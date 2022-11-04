@@ -39,6 +39,7 @@ class resizeBox {
       throw new Error("Invalid layout");
 
     this.create_container();
+    this.generateListeners();
   }
 
   create_container() {
@@ -67,17 +68,9 @@ class resizeBox {
       box.style.height =
         (this.boxes[key].bottom - this.boxes[key].top) * height_boxes + "px";
       box.style.position = "absolute";
-      // box.style.backgroundColor = '#444';
       box.style.background =
         "#" + Math.floor(Math.random() * 16777215).toString(16);
-      //   box.style.borderRadius = "5px";
-      // box.style.boxShadow = '0px 0px 5px #' + Math.floor(Math.random() * 16777215).toString(16);
       box.style.zIndex = "1";
-      // box.style.cursor = "pointer";
-      // box.style.transition = 'all 0.5s';
-      // box.style.transform = 'translate(-50%, -50%)';
-      // box.style.transformOrigin = '50% 50%';
-      // box.style.overflow = 'hidden';
 
       container.appendChild(box);
     });
@@ -87,7 +80,9 @@ class resizeBox {
       this.handle[key].forEach((handler, index) => {
         let bar = document.createElement("div");
         bar.classList.add("resize-bar");
-        bar.classList.add(key);
+        // bar.classList.add(key);
+        bar.setAttribute("data-axis", key);
+        bar.setAttribute("data-index", index);
         bar.style.position = "absolute";
         bar.style.zIndex = "2";
         bar.style.backgroundColor = this.color;
@@ -419,6 +414,26 @@ class resizeBox {
     }
 
     return true;
+  }
+
+  handleMouseDown(e) {
+    // get the mouse position
+    const box_type = e.target;
+    // get the box boundries
+    console.log(box_type);
+  }
+
+  // listen to the resize event
+  generateListeners() {
+    let handlers = document.querySelectorAll(".resize-bar");
+    console.log(handlers);
+    handlers.forEach((handler) => {
+      // click event on handle
+      handler.addEventListener("mousedown", (e) => {
+        this.handleMouseDown(e);
+        console.log("mousedown");
+      });
+    });
   }
 }
 
