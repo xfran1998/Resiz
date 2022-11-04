@@ -3,21 +3,25 @@ var dragging = false;
 class resizeBox {
   constructor(
     layout = null,
-    size = null,
-    location = "body",
-    class_box = "resize-box",
-    thickness_bar = "10px"
+    {
+      width = "500px",
+      height = "500px",
+      location = "body",
+      class_box = "resize-box",
+      thickness = "10px",
+      color = "#444",
+    }
   ) {
     if (layout === null) return;
 
     this.dragging = false;
 
-    const { width, height } = size;
     this.width = width;
     this.height = height;
     this.location = location;
     this.class_box = class_box;
-    this.thickness_bar = thickness_bar;
+    this.thickness = thickness;
+    this.color = color;
 
     this.min = 300;
     this.max = 1000;
@@ -66,7 +70,7 @@ class resizeBox {
       // box.style.backgroundColor = '#444';
       box.style.background =
         "#" + Math.floor(Math.random() * 16777215).toString(16);
-      box.style.borderRadius = "5px";
+      //   box.style.borderRadius = "5px";
       // box.style.boxShadow = '0px 0px 5px #' + Math.floor(Math.random() * 16777215).toString(16);
       box.style.zIndex = "1";
       // box.style.cursor = "pointer";
@@ -79,51 +83,54 @@ class resizeBox {
     });
 
     // create resizable bars
-    Object.keys(this.handle).forEach(key => {
+    Object.keys(this.handle).forEach((key) => {
       this.handle[key].forEach((handler, index) => {
-        let bar = document.createElement('div');
+        let bar = document.createElement("div");
         bar.classList.add("resize-bar");
         bar.classList.add(key);
-        bar.style.position = 'absolute';
-        bar.style.zIndex = '2';
-        bar.style.backgroundColor = '#444';
+        bar.style.position = "absolute";
+        bar.style.zIndex = "2";
+        bar.style.backgroundColor = this.color;
         // bar.style.borderRadius = 'px';
-        bar.style.cursor = 'pointer';
-        bar.style.transition = 'all 0.5s';
+        bar.style.transition = "all 0.5s";
         // bar.style.transformOrigin = '50% 50%';
-        
+
         console.log(handler);
-        if (key == 'xAxis') {
-          bar.style.transform = 'translate(0, -50%)';
-          let top = handler.boundrie[0][1] * height_boxes;
-          let left = handler.boundrie[0][0] * width_boxes;
-          let width = (handler.boundrie[1][1] - handler.boundrie[0][1]) * width_boxes;
-          // let height = parseInt(this.thickness_bar.split('px')[0]);
-          let height = 10;
-
-          bar.style.top = top + 'px';
-          bar.style.left = left + 'px';
-          bar.style.width = width + 'px';
-          bar.style.height = height + 'px';
-        }
-
-        if (key == 'yAxis') {
-          bar.style.transform = 'translate(-50%, 0)';
+        if (key == "xAxis") {
+          bar.style.cursor = "row-resize";
+          bar.style.transform = "translate(0, -50%)";
           let top = handler.boundrie[0][0] * height_boxes;
           let left = handler.boundrie[0][1] * width_boxes;
-          let width = 10;
-          let height = (handler.boundrie[1][0] - handler.boundrie[0][0]) * height_boxes;
+          let width =
+            (handler.boundrie[1][1] - handler.boundrie[0][1]) * width_boxes;
+          // let height = parseInt(this.thickness.split('px')[0]);
+          let height = this.thickness;
+          console.log(this.thickness);
 
-          bar.style.top = top + 'px';
-          bar.style.left = left + 'px';
-          bar.style.width = width + 'px';
-          bar.style.height = height + 'px';
+          bar.style.top = top + "px";
+          bar.style.left = left + "px";
+          bar.style.width = width + "px";
+          bar.style.height = height;
+        }
+
+        if (key == "yAxis") {
+          bar.style.cursor = "col-resize";
+          bar.style.transform = "translate(-50%, 0)";
+          let top = handler.boundrie[0][0] * height_boxes;
+          let left = handler.boundrie[0][1] * width_boxes;
+          let width = this.thickness;
+          let height =
+            (handler.boundrie[1][0] - handler.boundrie[0][0]) * height_boxes;
+
+          bar.style.top = top + "px";
+          bar.style.left = left + "px";
+          bar.style.width = width;
+          bar.style.height = height + "px";
         }
 
         container.appendChild(bar);
       });
     });
-
 
     document.querySelector("#test").appendChild(container);
   }
@@ -414,15 +421,6 @@ class resizeBox {
     return true;
   }
 }
-
-// Valid layour
-const valid_box = new resizeBox(
-  [
-    [0, "a", "a"],
-    [0, "b", "b"],
-  ],
-  { width: "600px", height: "500px" }
-);
 
 // Invalid layour
 // const invalid_box = new resizeBox(

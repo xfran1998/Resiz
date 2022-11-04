@@ -16,3 +16,5 @@ const valid_box = new resizeBox(
 Container of resizable div that can be customized and styled
 
 State: Alpha 0.0.1
+
+
