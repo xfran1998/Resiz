@@ -165,8 +165,8 @@ class resizeBox {
     // - Create a matrix with the layout.
     const boxes = {};
     const handle = {
-      xAxis: [], // horizontal bar  --> yAxis: [{ boundrie: [[1,1],[1,3]], containers: [0, 'a', 'b']}, {...} ]
-      yAxis: [], // vertical bar    --> xAxis: [{ boundrie: [[1,1],[3,1]], containers: [0, 'a', 'b']}, {...} ]
+      xAxis: [], // horizontal bar  --> yAxis: [{ boundrie: [[1,1],[1,3]], containers: [{id=0, side:'bottom'}, {id='a', side:'top'}, {id='b', side:'top'}] }]
+      yAxis: [], // vertical bar    --> xAxis: [{ boundrie: [[1,1],[3,1]], containers: [{id=0, side:'right'}, {id='a', side:'left'}, {id='b', side:'left'}] }]
     };
     this.main_axis_x = layout.length;
     this.main_axis_y = layout[0].length;
@@ -197,7 +197,7 @@ class resizeBox {
       // console.log(boundries);
       Object.keys(boundries.boundries).forEach((key) => {
         if (boundries.boundries[key] && boundries.boundries[key].length > 0) {
-          this.setHandler(handle, boundries.boundries[key], box_type);
+          this.setHandler(handle, boundries.boundries[key], box_type, key);
         }
       });
     });
@@ -210,7 +210,7 @@ class resizeBox {
     return boundrie[0][0] === boundrie[1][0]; // check if the boundrie is in the x axis. of 2 points
   }
 
-  setHandler(handlers, boundrie, box_type) {
+  setHandler(handlers, boundrie, box_type, side) {
     // check if the boundrie is in the x axis. of 2 points
     const axis = this.isXAxis(boundrie) ? "xAxis" : "yAxis";
 
@@ -225,9 +225,12 @@ class resizeBox {
     });
 
     // if the handler already exists, return
+    // console.log(handler);
+    // console.log(handlers);
+    // console.log(boundrie);
     if (handler) {
       // add container to the handler.
-      handler.containers.push(box_type);
+      handler.containers.push({ id: box_type, side: side });
       return;
     }
 
@@ -244,7 +247,7 @@ class resizeBox {
     // if the handler is contained, return
     if (containedBy) {
       // add container to the handler.
-      containedBy.containers.push(box_type);
+      containedBy.containers.push({ id: box_type, side: side });
 
       return;
     }
@@ -272,7 +275,7 @@ class resizeBox {
     // add the handler to the list
     handlers[axis].push({
       boundrie: boundrie,
-      containers: [box_type, ...containers],
+      containers: [{ id: box_type, side: side }, ...containers],
     });
   }
 
@@ -420,18 +423,20 @@ class resizeBox {
     // get the mouse position
     const box_type = e.target;
     // get the box boundries
-    console.log(box_type);
+    console.log(box_type.dataset);
+    // const handle = this.handlers[box_type.dataset.id][box_type.dataset.side];
   }
 
   // listen to the resize event
   generateListeners() {
     let handlers = document.querySelectorAll(".resize-bar");
     console.log(handlers);
+    console.log("box_type.dataset");
     handlers.forEach((handler) => {
       // click event on handle
       handler.addEventListener("mousedown", (e) => {
         this.handleMouseDown(e);
-        console.log("mousedown");
+        // console.log("mousedown");
       });
     });
   }
