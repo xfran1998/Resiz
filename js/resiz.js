@@ -1,6 +1,11 @@
 var dragging = false;
 
 class resizeBox {
+  static Direction = {
+    Horizontal: 0,
+    Vertical: 1,
+  }
+
   constructor(
     layout = null,
     {
@@ -29,6 +34,12 @@ class resizeBox {
     this.resizable_boxes = [];
     this.resizable_bar_x = []; // horizontal bar
     this.resizable_bar_y = []; // vertical bar
+
+    // for handling the resize
+    this.dirDrag = null;
+    this.isDragging = false;
+    this.draggingBar = null;
+
 
     this.create_layout(layout);
     console.log(this.boxes);
@@ -421,10 +432,36 @@ class resizeBox {
 
   handleMouseDown(e) {
     // get the mouse position
-    const box_type = e.target;
-    // get the box boundries
-    console.log(box_type.dataset);
-    // const handle = this.handlers[box_type.dataset.id][box_type.dataset.side];
+    const axis = e.target.getAttribute("data-axis");
+    const index = e.target.getAttribute("data-index");
+    
+    console.log(this);
+
+    this.dirDrag = axis === 'xAxis' ? resizeBox.Direction.Horizontal : resizeBox.Direction.Vertical;
+    this.isDragging = true;
+    this.draggingBar = this.handle[axis][index];
+
+    // Set listener for mouse move on document
+    document.addEventListener("mousemove", this.handleMouseMove);
+  }
+  
+  handleMouseMove(e) {
+    if (!this.isDragging) return;
+    // const { boundrie, containers } = this.draggingBar; 
+    // console.log('isDragging', {
+    //   boundrie,
+    //   containers,
+    // });
+
+    // get the mouse position
+    const mousePos = [e.offsetX, e.offsetY];
+    console.log('mousePos', mousePos);
+  }
+  
+  handleMouseUp(e) {
+    this.isDragging = false;
+    this.dirDrag = null;
+    this.draggingBar = null;
   }
 
   // listen to the resize event
@@ -436,7 +473,13 @@ class resizeBox {
       // click event on handle
       handler.addEventListener("mousedown", (e) => {
         this.handleMouseDown(e);
-        // console.log("mousedown");
+      });
+
+      // mouse up event on handle
+      handler.addEventListener("mouseup", (e) => {
+        // console.log("mouseup");
+        this.handleMouseUp(e);
+        // console.log("mouseup");
       });
     });
   }
