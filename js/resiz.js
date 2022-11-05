@@ -62,6 +62,7 @@ class resizeBox {
     this.generateListeners();
     this.getCoordMainContainer();
     this.getSizeMainContainer();
+    this.setContainerOnHandlers();
   }
 
   create_container() {
@@ -78,7 +79,7 @@ class resizeBox {
     // create resizable boxes
     Object.keys(this.boxes).forEach((key, index) => {
       let box = document.createElement("div");
-      box.classList.add("box");
+      box.id = key;
       box.classList.add("resize-box");
       box.style.top = this.boxes[key].top * height_boxes + "px";
       box.style.left = this.boxes[key].left * width_boxes + "px";
@@ -107,9 +108,6 @@ class resizeBox {
         bar.style.position = "absolute";
         bar.style.zIndex = "2";
         bar.style.backgroundColor = this.color;
-        // bar.style.borderRadius = 'px';
-        bar.style.transition = "all 0.5s";
-        // bar.style.transformOrigin = '50% 50%';
 
         console.log(handler);
         if (key == "xAxis") {
@@ -144,6 +142,7 @@ class resizeBox {
           bar.style.height = height + "px";
         }
 
+        handler.element = bar;
         container.appendChild(bar);
       });
     });
@@ -456,6 +455,19 @@ class resizeBox {
     };
   }
 
+  setContainerOnHandlers() {
+    // set the container on the handlers
+    console.log("setContainerOnHandlers");
+    Object.keys(this.handle).forEach((axis) => {
+      this.handle[axis].forEach((handle) => {
+        handle.containers.forEach((container) => {
+          // console.log(container);
+          container.element = document.getElementById(container.id);
+        });
+      });
+    });
+  }
+
   handleMouseDown(e) {
     // get the mouse position
     const axis = e.target.getAttribute("data-axis");
@@ -465,10 +477,13 @@ class resizeBox {
 
     this.dirDrag =
       axis === "xAxis"
-        ? resizeBox.Direction.Horizontal
-        : resizeBox.Direction.Vertical;
+        ? resizeBox.Direction.Vertical
+        : resizeBox.Direction.Horizontal;
     this.isDragging = true;
     this.draggingBar = this.handle[axis][index];
+
+    // avoid drag event draggingBar
+    e.preventDefault();
 
     // Set listener for mouse move on document
     document.body.addEventListener("mousemove", (e) => {
@@ -491,12 +506,18 @@ class resizeBox {
 
     // get the mouse position
     const mousePos = [e.clientX - this.coords.x, e.clientY - this.coords.y];
-    console.log("mousePos", mousePos);
 
+    // check if it's a valid position
     if (mousePos[0] < 0 || mousePos[0] > this.size.x) return;
     if (mousePos[1] < 0 || mousePos[1] > this.size.y) return;
 
-    console.log("this.draggingBar", this.draggingBar);
+    // console.log("this.draggingBar", this.draggingBar);
+    if (this.dirDrag === resizeBox.Direction.Vertical) {
+      // move the bar
+      this.draggingBar.element.style.top = mousePos[1] + "px";
+
+      // move the containers
+    }
   }
 
   handleMouseUp(e) {
