@@ -63,6 +63,7 @@ class resizeBox {
     this.getCoordMainContainer();
     this.getSizeMainContainer();
     this.setContainerOnHandlers();
+    this.setHandlersDependent();
   }
 
   create_container() {
@@ -214,7 +215,6 @@ class resizeBox {
 
       boxes[box_type] = boundries.corners;
 
-      // console.log(boundries);
       Object.keys(boundries.boundries).forEach((key) => {
         if (boundries.boundries[key] && boundries.boundries[key].length > 0) {
           this.setHandler(handle, boundries.boundries[key], box_type, key);
@@ -248,6 +248,12 @@ class resizeBox {
     // console.log(handler);
     // console.log(handlers);
     // console.log(boundrie);
+    // swap side --> container are in the opposite side of the handler.
+    if (side == "top") side = "bottom";
+    else if (side == "bottom") side = "top";
+    else if (side == "left") side = "right";
+    else if (side == "right") side = "left";
+
     if (handler) {
       // add container to the handler.
       handler.containers.push({ id: box_type, side: side });
@@ -268,7 +274,6 @@ class resizeBox {
     if (containedBy) {
       // add container to the handler.
       containedBy.containers.push({ id: box_type, side: side });
-
       return;
     }
 
@@ -447,6 +452,126 @@ class resizeBox {
     };
   }
 
+  setHandlersDependent() {
+    // set the handlers that need to be resized when the one of the handlers is moved.
+
+    // get the handlers that are colliding with each other.
+    const collidingHandlers = this.getCollidingHandlers();
+
+    // // set the handlers that need to be resized when the one of the handlers is moved.
+    // collisionHandlers.forEach((collision) => {
+
+    // });
+  }
+
+  getCollidingHandlers() {
+    // get the handlers that are colliding with each other.
+    const isColliding = (handler1, handler2, isVertical) => {
+      // check if the handlers are colliding
+      if (
+        isVertical &&
+        handler1.boundrie[0][1] != handler2.boundrie[0][1] &&
+        handler1.boundrie[0][1] != handler2.boundrie[1][1]
+      )
+        return false;
+
+      if (
+        !isVertical &&
+        handler1.boundrie[0][0] != handler2.boundrie[0][0] &&
+        handler1.boundrie[0][0] != handler2.boundrie[1][0]
+      )
+        return false;
+
+      // check if the handler 1 is bigger than the handler 2
+      // in case is not it means that the handler 1 is inside the handler 2
+      let size_handler1 = isVertical
+        ? handler1.boundrie[1][0] - handler1.boundrie[0][0]
+        : handler1.boundrie[1][1] - handler1.boundrie[0][1];
+
+      let size_handler2 =
+        isVertical == false
+          ? handler2.boundrie[1][0] - handler2.boundrie[0][0]
+          : handler2.boundrie[1][1] - handler2.boundrie[0][1];
+
+      // if (size_handler2 < size_handler1) return false;
+
+      return true;
+    };
+
+    // get the side is handler1 is colliding with handler2
+    const getCollidingSide = (handler1, handler2, isVertical) => {
+      if (!isVertical) {
+        if (
+          handler1.boundrie[0][0] < handler2.boundrie[0][0] ||
+          handler1.boundrie[0][0] < handler2.boundrie[1][0]
+        )
+          return "bottom";
+        else return "top";
+      } else {
+        if (
+          handler1.boundrie[0][1] < handler2.boundrie[0][1] ||
+          handler1.boundrie[0][1] < handler2.boundrie[1][1]
+        )
+          return "right";
+        else return "left";
+      }
+    };
+
+    console.log(this);
+    const handlers_axis = [];
+    handlers_axis.push(this.handle.xAxis); // push the x axis handlers
+    handlers_axis.push(this.handle.yAxis); // push the y axis handlers
+
+    // the colliding handlers only can be the ones that are on different axis.
+
+    console.log(handlers_axis);
+    const collidingHandlers = [];
+
+    // check if xAxis is colliding with yAxis
+    handlers_axis[0].forEach((handler1) => {
+      // check if the handler is colliding with any other handler
+      handlers_axis[1].forEach((handler2) => {
+        if (isColliding(handler1, handler2, false)) {
+          let side = getCollidingSide(handler1, handler2, false);
+          // collidingHandlers.push({
+          //   target: handler2,
+          //   origin: handler1,
+          //   side: side,
+          // });
+          if (!handler1["colliding"]) handler1["colliding"] = [];
+          handler1["colliding"].push({
+            target: handler2.element,
+            side: side,
+          });
+        }
+      });
+    });
+
+    // check if yAxis is colliding with xAxis
+    handlers_axis[1].forEach((handler1) => {
+      // check if the handler is colliding with any other handler
+      handlers_axis[0].forEach((handler2) => {
+        if (isColliding(handler1, handler2, true)) {
+          let side = getCollidingSide(handler1, handler2, true);
+          // collidingHandlers.push({
+          //   target: handler2,
+          //   origin: handler1,
+          //   side: side,
+          // });
+          if (!handler1["colliding"]) handler1["colliding"] = [];
+          handler1["colliding"].push({
+            target: handler2.element,
+            side: side,
+          });
+        }
+      });
+    });
+
+    console.log("collidingHandlers");
+    console.log(collidingHandlers);
+    return collidingHandlers;
+  }
+
   getSizeMainContainer() {
     // get size of the main container
     this.size = {
@@ -517,6 +642,18 @@ class resizeBox {
       this.draggingBar.element.style.top = mousePos[1] + "px";
 
       // move the containers
+      this.draggingBar.containers.forEach((container) => {
+        if (container.side == "bottom") {
+          // change top
+          container.element.style.top = mousePos[1] + "px";
+          // change height
+          container.element.style.height = this.size.y - mousePos[1] + "px";
+        }
+        if (container.side == "top") {
+          // change height
+          container.element.style.height = mousePos[1] + "px";
+        }
+      });
     }
   }
 
