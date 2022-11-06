@@ -28,8 +28,9 @@ class resizeBox {
     this.thickness = thickness;
     this.color = color;
 
-    this.min = 300;
-    this.max = 1000;
+    this.minHeight = 50;
+    this.minWidth = 50;
+    // this.max = 1000;
 
     this.size = {
       width: 0,
@@ -37,6 +38,11 @@ class resizeBox {
     };
 
     this.coords = {
+      x: 0,
+      y: 0,
+    };
+
+    this.deltaPosMouse = {
       x: 0,
       y: 0,
     };
@@ -635,6 +641,16 @@ class resizeBox {
 
     console.log(this);
 
+    this.deltaPosMouse = {
+      x: e.clientX,
+      y: e.clientY,
+    };
+
+    this.mouseGlobalPos = {
+      x: e.clientX,
+      y: e.clientY,
+    };
+
     this.dirDrag =
       axis === "xAxis"
         ? resizeBox.Direction.Vertical
@@ -666,7 +682,14 @@ class resizeBox {
 
     // get the mouse position
     const mousePos = [e.clientX - this.coords.x, e.clientY - this.coords.y];
-    const mouseGlobalPos = [e.clientX, e.clientY];
+    this.deltaPosMouse = {
+      x: e.clientX - this.mouseGlobalPos.x,
+      y: e.clientY - this.mouseGlobalPos.y,
+    };
+    this.mouseGlobalPos = {
+      x: e.clientX,
+      y: e.clientY,
+    };
 
     // check if it's a valid position
     if (mousePos[0] < 0 || mousePos[0] > this.size.x) return;
@@ -675,31 +698,73 @@ class resizeBox {
     // vertical direction
     if (this.dirDrag === resizeBox.Direction.Vertical) {
       // move the bar
-      this.draggingBar.element.style.top = mousePos[1] + "px";
+      // console.log("move the bar");
+      // console.log(this.draggingBar.element.style.top);
+      // console.log(this.deltaPosMouse.y);
+      let top =
+        parseInt(this.draggingBar.element.style.top) + this.deltaPosMouse.y;
+
+      let isValid = true;
+      /// check new heights are valid (height > this.minHeight)
+      this.draggingBar.containers.forEach((container) => {
+        let height = parseInt(container.element.style.height);
+        if (
+          container.side == "bottom" &&
+          height - this.deltaPosMouse.y < this.minHeight
+        )
+          isValid = false;
+        if (
+          container.side == "top" &&
+          height + this.deltaPosMouse.y < this.minHeight
+        )
+          isValid = false;
+      });
+
+      if (!isValid) return;
 
       // move the containers
       this.draggingBar.containers.forEach((container) => {
         if (container.side == "bottom") {
-          // change top
-          container.element.style.top = mousePos[1] + "px";
+          container.element.style.top = top + "px";
           // change height
-          container.element.style.height = this.size.y - mousePos[1] + "px";
+          container.element.style.height =
+            parseInt(container.element.style.height) -
+            this.deltaPosMouse.y +
+            "px";
         }
         if (container.side == "top") {
           // change height
-          container.element.style.height = mousePos[1] + "px";
+          container.element.style.height =
+            parseInt(container.element.style.height) +
+            this.deltaPosMouse.y +
+            "px";
         }
       });
+
+      this.draggingBar.element.style.top = top + "px";
 
       // move bars colliding with the draggingBar if exist
       if (this.draggingBar.colliding) {
         this.draggingBar.colliding.forEach((collidingBar) => {
           if (collidingBar.side == "bottom") {
-            collidingBar.target.style.top = mousePos[1] + "px";
-            collidingBar.target.style.height = this.size.y - mousePos[1] + "px";
+            // change top with deltaPosMouse
+            // change top
+            collidingBar.target.style.top =
+              parseInt(collidingBar.target.style.top) +
+              this.deltaPosMouse.y +
+              "px";
+            // change height
+            collidingBar.target.style.height =
+              parseInt(collidingBar.target.style.height) -
+              this.deltaPosMouse.y +
+              "px";
           }
           if (collidingBar.side == "top") {
-            collidingBar.target.style.height = mousePos[1] + "px";
+            // change height
+            collidingBar.target.style.height =
+              parseInt(collidingBar.target.style.height) +
+              this.deltaPosMouse.y +
+              "px";
           }
         });
       }
@@ -708,52 +773,73 @@ class resizeBox {
     // horizontal direction
     if (this.dirDrag === resizeBox.Direction.Horizontal) {
       // move the bar
-      this.draggingBar.element.style.left = mousePos[0] + "px";
-      let width_right = 0;
-      let width_left = 0;
+      let left =
+        parseInt(this.draggingBar.element.style.left) + this.deltaPosMouse.x;
 
-      // move bars colliding with the draggingBar if exist
-      if (this.draggingBar.colliding) {
-        this.draggingBar.colliding.forEach((collidingBar) => {
-          console.log(collidingBar);
-          if (collidingBar.side == "right") {
-            collidingBar.target.style.left = mousePos[0] + "px";
-            console.log(collidingBar);
-            const axis = collidingBar.target.getAttribute("data-axis");
-            const index = collidingBar.target.getAttribute("data-index");
-            const container_0 = this.handle[axis][index].containers[0];
-            // get pos of left coords of the container
-            const pos = container_0.element.getBoundingClientRect();
-            width_right = pos.right - mouseGlobalPos[0];
-            console.log("pos.right", pos);
-            console.log("mousePos[0]", mouseGlobalPos[0]);
-            // console.log("width", width);
-            collidingBar.target.style.width = width_right + "px";
-          }
-          if (collidingBar.side == "left") {
-            // console.log(mousePos[0]);
-            width_left = mousePos[0] - collidingBar.target.offsetLeft;
-            collidingBar.target.style.width = width_left + "px";
-          }
-        });
-      }
+      let isValid = true;
+      /// check new heights are valid (height > this.minHeight)
+      this.draggingBar.containers.forEach((container) => {
+        let width = parseInt(container.element.style.width);
+        if (
+          container.side == "right" &&
+          width - this.deltaPosMouse.x < this.minWidth
+        )
+          isValid = false;
+        if (
+          container.side == "left" &&
+          width + this.deltaPosMouse.x < this.minWidth
+        )
+          isValid = false;
+      });
+
+      if (!isValid) return;
 
       // move the containers
       this.draggingBar.containers.forEach((container) => {
         if (container.side == "right") {
-          // change left
-          container.element.style.left = mousePos[0] + "px";
+          container.element.style.left = left + "px";
           // change width
-          console.log("WIDTH", width_right);
-          // console.log(container.element.offsetLeft);
-          container.element.style.left = mousePos[0] + "px";
-          container.element.style.width = this.size.x - mousePos[0] + "px";
+          container.element.style.width =
+            parseInt(container.element.style.width) -
+            this.deltaPosMouse.x +
+            "px";
         }
         if (container.side == "left") {
           // change width
-          container.element.style.width = width_left + "px";
+          container.element.style.width =
+            parseInt(container.element.style.width) +
+            this.deltaPosMouse.x +
+            "px";
         }
       });
+
+      this.draggingBar.element.style.left = left + "px";
+
+      // move bars colliding with the draggingBar if exist
+      if (this.draggingBar.colliding) {
+        this.draggingBar.colliding.forEach((collidingBar) => {
+          if (collidingBar.side == "right") {
+            // change left with deltaPosMouse
+            // change left
+            collidingBar.target.style.left =
+              parseInt(collidingBar.target.style.left) +
+              this.deltaPosMouse.x +
+              "px";
+            // change width
+            collidingBar.target.style.width =
+              parseInt(collidingBar.target.style.width) -
+              this.deltaPosMouse.x +
+              "px";
+          }
+          if (collidingBar.side == "left") {
+            // change width
+            collidingBar.target.style.width =
+              parseInt(collidingBar.target.style.width) +
+              this.deltaPosMouse.x +
+              "px";
+          }
+        });
+      }
     }
   }
 
