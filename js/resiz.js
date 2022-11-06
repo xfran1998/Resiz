@@ -58,12 +58,13 @@ class resizeBox {
     if (!this.checkIsValidCorners(this.boxes))
       throw new Error("Invalid layout");
 
+    this.joinHandlers();
     this.create_container();
-    this.generateListeners();
     this.getCoordMainContainer();
     this.getSizeMainContainer();
     this.setContainerOnHandlers();
     this.setHandlersDependent();
+    this.generateListeners();
   }
 
   create_container() {
@@ -149,6 +150,40 @@ class resizeBox {
     });
 
     document.querySelector("#test").appendChild(container);
+  }
+
+  joinHandlers() {
+    // join the handlers on the same axis value
+    const y_axis = this.handle.yAxis;
+    for (let i = 0; i < y_axis.length; i++) {
+      for (let j = i + 1; j < y_axis.length; j++) {
+        if (y_axis[i].boundrie[0][1] === y_axis[j].boundrie[0][1]) {
+          // get min row and max row
+          let min_row = Math.min(
+            y_axis[i].boundrie[0][0],
+            y_axis[j].boundrie[0][0]
+          );
+          let max_row = Math.max(
+            y_axis[i].boundrie[1][0],
+            y_axis[j].boundrie[1][0]
+          );
+
+          // set the new boundrie
+          y_axis[i].boundrie[0][0] = min_row;
+          y_axis[i].boundrie[1][0] = max_row;
+
+          // get all the containers that are in both handlers
+          let containers = y_axis[i].containers.concat(y_axis[j].containers);
+          console.log(containers);
+
+          // set the new containers
+          y_axis[i].containers = containers;
+
+          // remove the second handler
+          y_axis.splice(j, 1);
+        }
+      }
+    }
   }
 
   create_layout(layout) {
