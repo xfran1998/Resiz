@@ -187,6 +187,39 @@ class resizeBox {
 
           // remove the second handler
           y_axis.splice(j, 1);
+          j--; // decrement j to avoid skipping an element
+        }
+      }
+    }
+
+    const x_axis = this.handle.xAxis;
+    for (let i = 0; i < x_axis.length; i++) {
+      for (let j = i + 1; j < x_axis.length; j++) {
+        if (x_axis[i].boundrie[0][0] === x_axis[j].boundrie[0][0]) {
+          // get min row and max row
+          let min_col = Math.min(
+            x_axis[i].boundrie[0][1],
+            x_axis[j].boundrie[0][1]
+          );
+          let max_col = Math.max(
+            x_axis[i].boundrie[1][1],
+            x_axis[j].boundrie[1][1]
+          );
+
+          // set the new boundrie
+          x_axis[i].boundrie[0][1] = min_col;
+          x_axis[i].boundrie[1][1] = max_col;
+
+          // get all the containers that are in both handlers
+          let containers = x_axis[i].containers.concat(x_axis[j].containers);
+          console.log(containers);
+
+          // set the new containers
+          x_axis[i].containers = containers;
+
+          // remove the second handler
+          x_axis.splice(j, 1);
+          j--; // to avoid skipping the next element
         }
       }
     }
