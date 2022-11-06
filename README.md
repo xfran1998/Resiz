@@ -1,10 +1,8 @@
 # Resiz (Resizable Div Container)
 
-Live Demo
+Live Demo: https://sevng.com/
 
 ## Create a resizable grid container with any layout you want.
-
-
 
 ```js
 const valid_box = new resizeBox(
