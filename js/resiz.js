@@ -666,12 +666,13 @@ class resizeBox {
 
     // get the mouse position
     const mousePos = [e.clientX - this.coords.x, e.clientY - this.coords.y];
+    const mouseGlobalPos = [e.clientX, e.clientY];
 
     // check if it's a valid position
     if (mousePos[0] < 0 || mousePos[0] > this.size.x) return;
     if (mousePos[1] < 0 || mousePos[1] > this.size.y) return;
 
-    // console.log("this.draggingBar", this.draggingBar);
+    // vertical direction
     if (this.dirDrag === resizeBox.Direction.Vertical) {
       // move the bar
       this.draggingBar.element.style.top = mousePos[1] + "px";
@@ -687,6 +688,70 @@ class resizeBox {
         if (container.side == "top") {
           // change height
           container.element.style.height = mousePos[1] + "px";
+        }
+      });
+
+      // move bars colliding with the draggingBar if exist
+      if (this.draggingBar.colliding) {
+        this.draggingBar.colliding.forEach((collidingBar) => {
+          if (collidingBar.side == "bottom") {
+            collidingBar.target.style.top = mousePos[1] + "px";
+            collidingBar.target.style.height = this.size.y - mousePos[1] + "px";
+          }
+          if (collidingBar.side == "top") {
+            collidingBar.target.style.height = mousePos[1] + "px";
+          }
+        });
+      }
+    }
+
+    // horizontal direction
+    if (this.dirDrag === resizeBox.Direction.Horizontal) {
+      // move the bar
+      this.draggingBar.element.style.left = mousePos[0] + "px";
+      let width_right = 0;
+      let width_left = 0;
+
+      // move bars colliding with the draggingBar if exist
+      if (this.draggingBar.colliding) {
+        this.draggingBar.colliding.forEach((collidingBar) => {
+          console.log(collidingBar);
+          if (collidingBar.side == "right") {
+            collidingBar.target.style.left = mousePos[0] + "px";
+            console.log(collidingBar);
+            const axis = collidingBar.target.getAttribute("data-axis");
+            const index = collidingBar.target.getAttribute("data-index");
+            const container_0 = this.handle[axis][index].containers[0];
+            // get pos of left coords of the container
+            const pos = container_0.element.getBoundingClientRect();
+            width_right = pos.right - mouseGlobalPos[0];
+            console.log("pos.right", pos);
+            console.log("mousePos[0]", mouseGlobalPos[0]);
+            // console.log("width", width);
+            collidingBar.target.style.width = width_right + "px";
+          }
+          if (collidingBar.side == "left") {
+            // console.log(mousePos[0]);
+            width_left = mousePos[0] - collidingBar.target.offsetLeft;
+            collidingBar.target.style.width = width_left + "px";
+          }
+        });
+      }
+
+      // move the containers
+      this.draggingBar.containers.forEach((container) => {
+        if (container.side == "right") {
+          // change left
+          container.element.style.left = mousePos[0] + "px";
+          // change width
+          console.log("WIDTH", width_right);
+          // console.log(container.element.offsetLeft);
+          container.element.style.left = mousePos[0] + "px";
+          container.element.style.width = this.size.x - mousePos[0] + "px";
+        }
+        if (container.side == "left") {
+          // change width
+          container.element.style.width = width_left + "px";
         }
       });
     }
