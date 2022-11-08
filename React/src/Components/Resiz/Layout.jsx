@@ -1,19 +1,9 @@
 import { createElement, useEffect, useState } from "react";
 // import ResizeBox from "./assets/resiz";
-import { cloneElement } from "react";
-import ResizeBox from "./Components/Resiz/Resiz";
+import ResizeBox from "./Resiz";
 
-function Layout({layout, options={}}) {
+function Layout() {
   const [containers, setContainers] = useState([]);
-  
-  const initLayout = () => {
-
-  }
-
-  useEffect(() => {
-    console.log(layout);
-    console.log(options);
-  });
 
   return (
     <div id="test">
