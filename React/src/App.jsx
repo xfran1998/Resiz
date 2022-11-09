@@ -28,7 +28,7 @@ function App() {
       height: "500px",
       thickness: "4px",
       color: "#111",
-      id_wrapper: "test",
+      idWrapper: "test",
       background: "#ddd",
       minHeight: 500,
       minWidth: 500,

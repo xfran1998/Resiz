@@ -4,9 +4,14 @@ const useLayout = (layout, options) => {
   const [minHeight, setMinHeightContainer] = useState(options.minHeight || 50);
   const [minWidth, setMinWidthcontainer] = useState(options.minWidth || 50);
   const [containers, setContainers] = useState([]);
+  const [wrapper, setWrapper] = useState(null);
   const [size, setSize] = useState({
-    width: options.width || "100%",
-    height: options.height || "100%",
+    width: parseInt(options.width) || 500,
+    height: parseInt(options.height) || 500,
+  });
+  const [sizeUnit, setSizeUnit] = useState({
+    width: options.width.split(size.width)[1] || "rem",
+    height: options.height.split(size.height)[1] || "rem",
   });
   const [coords, setCoords] = useState({
     x: 0,
@@ -25,6 +30,15 @@ const useLayout = (layout, options) => {
 
   const [boxes, setBoxes] = useState(null);
   const [handlers, setHandlers] = useState(null);
+
+  // aux variables needed in multiple functions
+  let width_boxes = 0;
+  let height_boxes = 0;
+
+  let main_axis_x = 0;
+  let main_axis_y = 0;
+
+  console.log(sizeUnit);
 
   const createLayout = (layout) => {
     // RULES:
@@ -64,8 +78,8 @@ const useLayout = (layout, options) => {
       xAxis: [], // horizontal bar  --> yAxis: [{ boundrie: [[1,1],[1,3]], containers: [{id=0, side:'bottom'}, {id='a', side:'top'}, {id='b', side:'top'}] }]
       yAxis: [], // vertical bar    --> xAxis: [{ boundrie: [[1,1],[3,1]], containers: [{id=0, side:'right'}, {id='a', side:'left'}, {id='b', side:'left'}] }]
     };
-    let main_axis_x = layout.length;
-    let main_axis_y = layout[0].length;
+    main_axis_x = layout.length;
+    main_axis_y = layout[0].length;
 
     // Get different _boxes from the layout.
     for (let i = 0; i < main_axis_x; i++) {
@@ -280,9 +294,7 @@ const useLayout = (layout, options) => {
 
   const joinHandlers = (_handle) => {
     // join the handlers on the same axis value
-    console.log("joinHandlers1", _handle);
-
-    // aux function
+    // aux function with the join logic
     const join = (
       minCoord1,
       minCoord2,
@@ -354,16 +366,128 @@ const useLayout = (layout, options) => {
     console.log("joinHandlers2", _handle);
   };
 
+  const createContainer = (_boxes, _handle) => {
+    console.log("width: ", size.width);
+    console.log("height: ", size.height);
+    console.log("main_axis_y: ", main_axis_y);
+    console.log("main_axis_x: ", main_axis_x);
+
+    width_boxes = size.width / main_axis_y;
+    height_boxes = size.height / main_axis_x;
+
+    const style_container = {
+      width: size.width + "px",
+      height: size.height + "px",
+      position: "relative",
+      overflow: "hidden",
+    };
+
+    let container = (
+      <div
+        id="{options.idWrapper}"
+        className="resize-container"
+        style={style_container}
+      ></div>
+    );
+
+    console.log("width_boxes: ", width_boxes);
+    console.log("height_boxes: ", height_boxes);
+    // create resizable boxes
+
+    const react_containers = [];
+    Object.keys(_boxes).forEach((key, index) => {
+      const style_box = {
+        top: _boxes[key].top + height_boxes + "px",
+        left: _boxes[key].left + width_boxes + "px",
+        width: (_boxes[key].right - _boxes[key].left) * width_boxes + "px",
+        height: (_boxes[key].bottom - _boxes[key].top) * height_boxes + "px",
+        position: "absolute",
+        background: options.background || "red",
+        zIndex: 1,
+      };
+
+      let _box = <div id="{key}" className="resize-box"></div>;
+
+      // add the box to the container
+      react_containers.push(_box);
+    });
+
+    console.log("react_containers: ", react_containers);
+    return;
+
+    container.appendChild(box);
+    this.containers.push({ id: key, box: box });
+
+    this.mainContainer = container;
+
+    // create resizable bars
+    Object.keys(this.handle).forEach((key) => {
+      this.handle[key].forEach((handler, index) => {
+        let bar = document.createElement("div");
+        bar.classList.add("resize-bar");
+        // bar.classList.add(key);
+        bar.setAttribute("data-axis", key);
+        bar.setAttribute("data-index", index);
+        bar.style.position = "absolute";
+        bar.style.zIndex = "2";
+        bar.style.backgroundColor = this.color;
+
+        if (key == "xAxis") {
+          bar.style.cursor = "row-resize";
+          bar.style.transform = "translate(0, -50%)";
+          let top = handler.boundrie[0][0] * height_boxes;
+          let left = handler.boundrie[0][1] * width_boxes;
+          let width =
+            (handler.boundrie[1][1] - handler.boundrie[0][1]) * width_boxes;
+          // let height = parseInt(this.thickness.split('px')[0]);
+          let height = this.thickness;
+
+          bar.style.top = top + "px";
+          bar.style.left = left + "px";
+          bar.style.width = width + "px";
+          bar.style.height = height;
+        }
+
+        if (key == "yAxis") {
+          bar.style.cursor = "col-resize";
+          bar.style.transform = "translate(-50%, 0)";
+          let top = handler.boundrie[0][0] * height_boxes;
+          let left = handler.boundrie[0][1] * width_boxes;
+          let width = this.thickness;
+          let height =
+            (handler.boundrie[1][0] - handler.boundrie[0][0]) * height_boxes;
+
+          bar.style.top = top + "px";
+          bar.style.left = left + "px";
+          bar.style.width = width;
+          bar.style.height = height + "px";
+        }
+
+        handler.element = bar;
+        container.appendChild(bar);
+      });
+    });
+
+    wrapper.appendChild(container);
+    return wrapper;
+  };
+
   const initLayout = () => {
     console.log("initLayout");
     // console.log(layout);
     // console.log(options);
 
     const { _boxes, _handle } = createLayout(layout);
+
     // check if the layout is valid.
     if (!checkIsValidCorners(_boxes)) throw new Error("Invalid layout");
+    console.log("width_boxes", width_boxes);
+    console.log("height_boxes", height_boxes);
 
     joinHandlers(_handle);
+    console.log("width_boxes", width_boxes);
+    console.log("height_boxes", height_boxes);
+    setWrapper(createContainer(_boxes, _handle));
   };
 
   return {
