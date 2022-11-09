@@ -60,7 +60,7 @@ const useLayout = (layout, options) => {
     // STEP 1:
     // - Create a matrix with the layout.
     const _boxes = {};
-    const handle = {
+    const _handle = {
       xAxis: [], // horizontal bar  --> yAxis: [{ boundrie: [[1,1],[1,3]], containers: [{id=0, side:'bottom'}, {id='a', side:'top'}, {id='b', side:'top'}] }]
       yAxis: [], // vertical bar    --> xAxis: [{ boundrie: [[1,1],[3,1]], containers: [{id=0, side:'right'}, {id='a', side:'left'}, {id='b', side:'left'}] }]
     };
@@ -88,17 +88,19 @@ const useLayout = (layout, options) => {
 
       Object.keys(boundries.boundries).forEach((key) => {
         if (boundries.boundries[key] && boundries.boundries[key].length > 0) {
-          setHandler(handle, boundries.boundries[key], box_type, key);
+          setHandler(_handle, boundries.boundries[key], box_type, key); // method to create the handlers.
         }
       });
     });
 
     // this._boxes = _boxes;
     // this.handle = handle;
-    console.log("this._boxes", _boxes);
-    console.log("this.handle", handle);
-    setBoxes(_boxes);
-    setHandlers(handle);
+    console.log("_boxes", _boxes);
+    console.log("handle", _handle);
+    // setBoxes(_boxes);
+    // setHandlers(handle); // useState to save the handlers.
+
+    return { _boxes, _handle };
   };
 
   const getBoundries = (_boxes, max_size_x, max_size_y) => {
@@ -245,15 +247,123 @@ const useLayout = (layout, options) => {
     return boundrie[0][0] === boundrie[1][0]; // check if the boundrie is in the x axis. of 2 points
   };
 
+  const checkIsValidCorners = (corners) => {
+    let box = [];
+    Object.keys(corners).forEach((box_type) => {
+      box.push(corners[box_type]);
+    });
+
+    // check all the boxes are not overlaping the others.
+    for (let i = 0; i < box.length; i++) {
+      for (let j = i + 1; j < box.length; j++) {
+        if (isOverlaping(box[i], box[j])) {
+          return false;
+        }
+      }
+    }
+
+    return true;
+  };
+
+  const isOverlaping = (box1, box2) => {
+    // box = {top: , right: , bottom: , left: }
+    // check if the boxes are overlaping
+    if (box1.top >= box2.bottom || box1.bottom <= box2.top) {
+      return false;
+    }
+    if (box1.left >= box2.right || box1.right <= box2.left) {
+      return false;
+    }
+
+    return true;
+  };
+
+  const joinHandlers = (_handle) => {
+    // join the handlers on the same axis value
+    console.log("joinHandlers1", _handle);
+
+    // aux function
+    const join = (
+      minCoord1,
+      minCoord2,
+      maxCoord1,
+      maxCoord2,
+      axis,
+      isXAxis,
+      i,
+      j
+    ) => {
+      // get min row and max row
+      let min_row = Math.min(minCoord1, minCoord2);
+      let max_row = Math.max(maxCoord1, maxCoord2);
+
+      // set the new boundrie
+      const min_y = isXAxis ? 1 : 0;
+      const max_y = isXAxis ? 1 : 0;
+
+      axis[i].boundrie[0][min_y] = min_row;
+      axis[i].boundrie[1][max_y] = max_row;
+
+      // get all the containers that are in both handlers
+      axis[i].containers = axis[i].containers.concat(axis[j].containers);
+
+      // remove the handler
+      axis.splice(j, 1);
+    };
+
+    const y_axis = _handle.yAxis;
+    for (let i = 0; i < y_axis.length; i++) {
+      for (let j = i + 1; j < y_axis.length; j++) {
+        if (y_axis[i].boundrie[0][1] === y_axis[j].boundrie[0][1]) {
+          join(
+            y_axis[i].boundrie[0][0],
+            y_axis[j].boundrie[0][0],
+            y_axis[i].boundrie[1][0],
+            y_axis[j].boundrie[1][0],
+            y_axis,
+            false,
+            i,
+            j
+          );
+
+          j--; // decrement j to avoid skipping an element
+        }
+      }
+    }
+
+    const x_axis = _handle.xAxis;
+    for (let i = 0; i < x_axis.length; i++) {
+      for (let j = i + 1; j < x_axis.length; j++) {
+        if (x_axis[i].boundrie[0][0] === x_axis[j].boundrie[0][0]) {
+          join(
+            x_axis[i].boundrie[0][1],
+            x_axis[j].boundrie[0][1],
+            x_axis[i].boundrie[1][1],
+            x_axis[j].boundrie[1][1],
+            x_axis,
+            true,
+            i,
+            j
+          );
+
+          j--; // to avoid skipping the next element
+        }
+      }
+    }
+
+    console.log("joinHandlers2", _handle);
+  };
+
   const initLayout = () => {
     console.log("initLayout");
-    console.log(layout);
-    console.log(options);
+    // console.log(layout);
+    // console.log(options);
 
-    createLayout(layout);
+    const { _boxes, _handle } = createLayout(layout);
     // check if the layout is valid.
-    // if (!this.checkIsValidCorners(this.boxes))
-    //   throw new Error("Invalid layout");
+    if (!checkIsValidCorners(_boxes)) throw new Error("Invalid layout");
+
+    joinHandlers(_handle);
   };
 
   return {
