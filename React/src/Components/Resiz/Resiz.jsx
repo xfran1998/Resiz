@@ -14,8 +14,8 @@ function Resiz({ layout, options = {} }) {
     <>
       {/* <h1>Resize!!!</h1> */}
       <Container
-        idContainer={"Raul Manco"}
-        boxes={{ top: 1, left: 0, right: 1, bottom: 1 }}
+        idContainer={"Oscar Manco"}
+        boxes={{ top: 1, left: 1, right: 2, bottom: 2 }}
         height_boxes={200}
         width_boxes={200}
         background={"#ddd"}

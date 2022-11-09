@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import  Container from "../Container";
 
 const useLayout = (layout, options) => {
   const [minHeight, setMinHeightContainer] = useState(options.minHeight || 50);
@@ -375,21 +376,6 @@ const useLayout = (layout, options) => {
     width_boxes = size.width / main_axis_y;
     height_boxes = size.height / main_axis_x;
 
-    const style_container = {
-      width: size.width + "px",
-      height: size.height + "px",
-      position: "relative",
-      overflow: "hidden",
-    };
-
-    let container = (
-      <div
-        id="{options.idWrapper}"
-        className="resize-container"
-        style={style_container}
-      ></div>
-    );
-
     console.log("width_boxes: ", width_boxes);
     console.log("height_boxes: ", height_boxes);
     // create resizable boxes
@@ -406,13 +392,34 @@ const useLayout = (layout, options) => {
         zIndex: 1,
       };
 
-      let _box = <div id="{key}" className="resize-box"></div>;
+    //   let _box = <div id="{key}" className="resize-box"></div>;
 
       // add the box to the container
-      react_containers.push(_box);
+
+      // react_containers.push(_box);
+      
+      
+      let _box = <Container id={key} className="resize-box" style={style_box} />;
+
+      
     });
 
     console.log("react_containers: ", react_containers);
+    const style_container = {
+      width: size.width + "px",
+      height: size.height + "px",
+      position: "relative",
+      overflow: "hidden",
+    };
+
+    let container = (
+      <div
+        id="{options.idWrapper}"
+        className="resize-container"
+        style={style_container}
+      ></div>
+    );
+
     return;
 
     container.appendChild(box);

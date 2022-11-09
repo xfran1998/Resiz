@@ -1,25 +1,27 @@
 import { useEffect, useState } from "react";
-import { useControlContainer } from "./Hooks/useContainer";
+import { useContainer } from "./Hooks/useContainer";
 
 function Container({
   idContainer,
-  boxes,
-  height_boxes,
-  width_boxes,
   background,
+  zIndex,
+  ...rest
 }) {
-  const [height, setHeight] = useState(height_boxes);
-  const [width, setWidth] = useState(width_boxes);
-  const [top, setTop] = useState(boxes.top * height_boxes);
-  const [left, setLeft] = useState(boxes.left * width_boxes);
+  // const [height, setHeight] = useState(size.height);
+  // const [width, setWidth] = useState(size.width);
+  // const [top, setTop] = useState(size.top * size.height);
+  // const [left, setLeft] = useState(size.left * size.width);
   const [id, setId] = useState(idContainer);
-  const { style } = useControlContainer({
+  const { style } = useContainer({
     idContainer,
-    boxes,
-    height_boxes,
-    width_boxes,
-    background,
+  background,
+  zIndex,
+  ...rest 
   });
+
+  useEffect(() => {
+    console.log('style: ', style);
+  }, []);
 
   return (
     <div id={idContainer} className="resize-box" style={style}>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-const useControlContainer = ({
+const useControlContainers = ({
   idContainer,
   boxes,
   height_boxes,
@@ -22,4 +22,4 @@ const useControlContainer = ({
   return { style };
 };
 
-export { useControlContainer };
+export { useControlContainers };
