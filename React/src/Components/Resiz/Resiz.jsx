@@ -4,7 +4,7 @@ import Handler from "./Handler";
 import { useLayout } from "./Hooks/useLayout";
 
 function Resiz({ layout, options = {} }) {
-  const { initLayout } = useLayout(layout, options);
+  const { wrapper, initLayout } = useLayout(layout, options);
 
   useEffect(() => {
     initLayout();
@@ -13,14 +13,15 @@ function Resiz({ layout, options = {} }) {
   return (
     <>
       {/* <h1>Resize!!!</h1> */}
-      <Container
+      {/* <Container
         idContainer={"Oscar Manco"}
         boxes={{ top: 1, left: 1, right: 2, bottom: 2 }}
         height_boxes={200}
         width_boxes={200}
         background={"#ddd"}
       />
-      <Handler />
+      <Handler /> */}
+      {wrapper}
     </>
   );
 }

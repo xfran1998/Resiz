@@ -1,12 +1,8 @@
 import { useEffect, useState } from "react";
 import { useContainer } from "./Hooks/useContainer";
 
-function Container({
-  idContainer,
-  background,
-  zIndex,
-  ...rest
-}) {
+function Container({ idContainer, background, zIndex, ...rest }) {
+  console.log("rest: ", rest);
   // const [height, setHeight] = useState(size.height);
   // const [width, setWidth] = useState(size.width);
   // const [top, setTop] = useState(size.top * size.height);
@@ -14,13 +10,13 @@ function Container({
   const [id, setId] = useState(idContainer);
   const { style } = useContainer({
     idContainer,
-  background,
-  zIndex,
-  ...rest 
+    background,
+    zIndex,
+    ...rest,
   });
 
   useEffect(() => {
-    console.log('style: ', style);
+    console.log("style: ", style);
   }, []);
 
   return (

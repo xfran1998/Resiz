@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import  Container from "../Container";
+import Container from "../Container";
 
 const useLayout = (layout, options) => {
   const [minHeight, setMinHeightContainer] = useState(options.minHeight || 50);
@@ -392,19 +392,93 @@ const useLayout = (layout, options) => {
         zIndex: 1,
       };
 
-    //   let _box = <div id="{key}" className="resize-box"></div>;
-
-      // add the box to the container
-
-      // react_containers.push(_box);
-      
-      
-      let _box = <Container id={key} className="resize-box" style={style_box} />;
-
-      
+      let _box = (
+        <Container
+          idContainer={key}
+          key={key}
+          className="resize-box"
+          style={style_box}
+        />
+      );
+      react_containers.push(_box);
     });
 
-    console.log("react_containers: ", react_containers);
+    // container.appendChild(box);
+    // this.containers.push({ id: key, box: box });
+    // this.mainContainer = container;
+
+    // create resizable bars
+    const react_bars = [];
+    Object.keys(_handle).forEach((key) => {
+      _handle[key].forEach((handler, index) => {
+        // let bar = document.createElement("div");
+        let style = {
+          position: "absolute",
+          background: options.color || "red",
+          zIndex: 2,
+        };
+
+        if (key === "xAxis") {
+          style.width = "100%";
+          style.height = options.size || "10px";
+          style.top = handler.boundrie[0][1] * height_boxes + "px";
+          style.left = 0;
+        } else {
+          style.width = options.size || "10px";
+          style.height = "100%";
+          style.top = 0;
+          style.left = handler.boundrie[0][0] * width_boxes + "px";
+        }
+
+        // bar.classList.add("resize-bar");
+        // // bar.classList.add(key);
+        // bar.setAttribute("data-axis", key);
+        // bar.setAttribute("data-index", index);
+        // bar.style.position = "absolute";
+        // bar.style.zIndex = "2";
+        // bar.style.backgroundColor = this.color;
+
+        // if (key == "xAxis") {
+        //   bar.style.cursor = "row-resize";
+        //   bar.style.transform = "translate(0, -50%)";
+        //   let top = handler.boundrie[0][0] * height_boxes;
+        //   let left = handler.boundrie[0][1] * width_boxes;
+        //   let width =
+        //     (handler.boundrie[1][1] - handler.boundrie[0][1]) * width_boxes;
+        //   // let height = parseInt(this.thickness.split('px')[0]);
+        //   let height = this.thickness;
+
+        //   bar.style.top = top + "px";
+        //   bar.style.left = left + "px";
+        //   bar.style.width = width + "px";
+        //   bar.style.height = height;
+        // }
+
+        // if (key == "yAxis") {
+        //   bar.style.cursor = "col-resize";
+        //   bar.style.transform = "translate(-50%, 0)";
+        //   let top = handler.boundrie[0][0] * height_boxes;
+        //   let left = handler.boundrie[0][1] * width_boxes;
+        //   let width = this.thickness;
+        //   let height =
+        //     (handler.boundrie[1][0] - handler.boundrie[0][0]) * height_boxes;
+
+        //   bar.style.top = top + "px";
+        //   bar.style.left = left + "px";
+        //   bar.style.width = width;
+        //   bar.style.height = height + "px";
+        // }
+
+        // handler.element = bar;
+        // container.appendChild(bar);
+
+        let _bar = (
+          <div key={`res-bar-${index}`} className="resize-bar" style={style} />
+        );
+        react_bars.push(_bar);
+      });
+    });
+
     const style_container = {
       width: size.width + "px",
       height: size.height + "px",
@@ -412,71 +486,16 @@ const useLayout = (layout, options) => {
       overflow: "hidden",
     };
 
-    let container = (
+    return (
       <div
         id="{options.idWrapper}"
         className="resize-container"
         style={style_container}
-      ></div>
+      >
+        {react_containers}
+        {react_bars}
+      </div>
     );
-
-    return;
-
-    container.appendChild(box);
-    this.containers.push({ id: key, box: box });
-
-    this.mainContainer = container;
-
-    // create resizable bars
-    Object.keys(this.handle).forEach((key) => {
-      this.handle[key].forEach((handler, index) => {
-        let bar = document.createElement("div");
-        bar.classList.add("resize-bar");
-        // bar.classList.add(key);
-        bar.setAttribute("data-axis", key);
-        bar.setAttribute("data-index", index);
-        bar.style.position = "absolute";
-        bar.style.zIndex = "2";
-        bar.style.backgroundColor = this.color;
-
-        if (key == "xAxis") {
-          bar.style.cursor = "row-resize";
-          bar.style.transform = "translate(0, -50%)";
-          let top = handler.boundrie[0][0] * height_boxes;
-          let left = handler.boundrie[0][1] * width_boxes;
-          let width =
-            (handler.boundrie[1][1] - handler.boundrie[0][1]) * width_boxes;
-          // let height = parseInt(this.thickness.split('px')[0]);
-          let height = this.thickness;
-
-          bar.style.top = top + "px";
-          bar.style.left = left + "px";
-          bar.style.width = width + "px";
-          bar.style.height = height;
-        }
-
-        if (key == "yAxis") {
-          bar.style.cursor = "col-resize";
-          bar.style.transform = "translate(-50%, 0)";
-          let top = handler.boundrie[0][0] * height_boxes;
-          let left = handler.boundrie[0][1] * width_boxes;
-          let width = this.thickness;
-          let height =
-            (handler.boundrie[1][0] - handler.boundrie[0][0]) * height_boxes;
-
-          bar.style.top = top + "px";
-          bar.style.left = left + "px";
-          bar.style.width = width;
-          bar.style.height = height + "px";
-        }
-
-        handler.element = bar;
-        container.appendChild(bar);
-      });
-    });
-
-    wrapper.appendChild(container);
-    return wrapper;
   };
 
   const initLayout = () => {
@@ -499,6 +518,7 @@ const useLayout = (layout, options) => {
 
   return {
     initLayout,
+    wrapper,
   };
 };
 
