@@ -10,6 +10,7 @@ const useLayout = (layout, options) => {
     width: parseInt(options.width) || 500,
     height: parseInt(options.height) || 500,
   });
+  const [thickness, setThickness] = useState(options.thickness || "4px");
   const [sizeUnit, setSizeUnit] = useState({
     width: options.width.split(size.width)[1] || "rem",
     height: options.height.split(size.height)[1] || "rem",
@@ -417,59 +418,29 @@ const useLayout = (layout, options) => {
           zIndex: 2,
         };
 
+        console.log("key", key);
+        console.log("thickness", thickness);
+
         if (key === "xAxis") {
-          style.width = "100%";
-          style.height = options.size || "10px";
-          style.top = handler.boundrie[0][1] * height_boxes + "px";
-          style.left = 0;
+          style.transform = "translateY(-50%)";
+          style.top = handler.boundrie[0][0] * height_boxes;
+          style.left = handler.boundrie[0][1] * width_boxes;
+          style.width =
+            (handler.boundrie[1][1] - handler.boundrie[0][1]) * width_boxes;
+          style.height = thickness;
         } else {
-          style.width = options.size || "10px";
-          style.height = "100%";
-          style.top = 0;
-          style.left = handler.boundrie[0][0] * width_boxes + "px";
+          style.transform = "translateX(-50%)";
+          style.top = handler.boundrie[0][0] * height_boxes;
+          style.left = handler.boundrie[0][1] * width_boxes;
+          style.height =
+            (handler.boundrie[1][0] - handler.boundrie[0][0]) * height_boxes;
+          style.width = thickness;
         }
 
-        // bar.classList.add("resize-bar");
-        // // bar.classList.add(key);
-        // bar.setAttribute("data-axis", key);
-        // bar.setAttribute("data-index", index);
-        // bar.style.position = "absolute";
-        // bar.style.zIndex = "2";
-        // bar.style.backgroundColor = this.color;
+        style.top += "px";
+        style.left += "px";
 
-        // if (key == "xAxis") {
-        //   bar.style.cursor = "row-resize";
-        //   bar.style.transform = "translate(0, -50%)";
-        //   let top = handler.boundrie[0][0] * height_boxes;
-        //   let left = handler.boundrie[0][1] * width_boxes;
-        //   let width =
-        //     (handler.boundrie[1][1] - handler.boundrie[0][1]) * width_boxes;
-        //   // let height = parseInt(this.thickness.split('px')[0]);
-        //   let height = this.thickness;
-
-        //   bar.style.top = top + "px";
-        //   bar.style.left = left + "px";
-        //   bar.style.width = width + "px";
-        //   bar.style.height = height;
-        // }
-
-        // if (key == "yAxis") {
-        //   bar.style.cursor = "col-resize";
-        //   bar.style.transform = "translate(-50%, 0)";
-        //   let top = handler.boundrie[0][0] * height_boxes;
-        //   let left = handler.boundrie[0][1] * width_boxes;
-        //   let width = this.thickness;
-        //   let height =
-        //     (handler.boundrie[1][0] - handler.boundrie[0][0]) * height_boxes;
-
-        //   bar.style.top = top + "px";
-        //   bar.style.left = left + "px";
-        //   bar.style.width = width;
-        //   bar.style.height = height + "px";
-        // }
-
-        // handler.element = bar;
-        // container.appendChild(bar);
+        console.log("style", style);
 
         let _bar = (
           <div key={`res-bar-${index}`} className="resize-bar" style={style} />
