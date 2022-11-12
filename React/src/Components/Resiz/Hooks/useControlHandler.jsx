@@ -1,20 +1,30 @@
 import { useEffect, useState } from "react";
 
-const useControlContainer = ({
-  idContainer,
-  boxes,
-  height_boxes,
-  width_boxes,
-  background,
-}) => {
+const useControlHandler = ({ handlerStyle }) => {
+  console.log("handlerStyle", handlerStyle);
+  // const {
+  //   topStyle = top,
+  //   leftStyle = left,
+  //   widthStyle = width,
+  //   heightStyle = height,
+  //   ...restStyle
+  // } = handlerStyle;
+  const [top, setTop] = useState(handlerStyle.top);
+  const [left, setLeft] = useState(handlerStyle.left);
+  const [width, setWidth] = useState(handlerStyle.width);
+  const [height, setHeight] = useState(handlerStyle.height);
+
+  delete handlerStyle.top;
+  delete handlerStyle.left;
+  delete handlerStyle.width;
+  delete handlerStyle.height;
+
   const [style, setStyle] = useState({
-    height: height_boxes,
-    width: width_boxes,
-    background: background,
-    zIndex: 1,
-    position: "absolute",
-    top: boxes.top * height_boxes + "px",
-    left: boxes.left * width_boxes + "px",
+    top: top + "px",
+    left: left + "px",
+    width: width + "px",
+    height: height + "px",
+    ...handlerStyle,
   });
 
   const handleChangePos = ({}) => {};
@@ -22,4 +32,4 @@ const useControlContainer = ({
   return { style };
 };
 
-export { useControlContainer };
+export { useControlHandler };

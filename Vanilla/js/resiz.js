@@ -57,8 +57,6 @@ class resizeBox {
     this.draggingBar = null;
 
     this.create_layout(layout);
-    console.log(this.boxes);
-    console.log(this.handle);
 
     // check if the layout is valid.
     if (!this.checkIsValidCorners(this.boxes))
@@ -117,7 +115,6 @@ class resizeBox {
         bar.style.zIndex = "2";
         bar.style.backgroundColor = this.color;
 
-        console.log(handler);
         if (key == "xAxis") {
           bar.style.cursor = "row-resize";
           bar.style.transform = "translate(0, -50%)";
@@ -127,7 +124,6 @@ class resizeBox {
             (handler.boundrie[1][1] - handler.boundrie[0][1]) * width_boxes;
           // let height = parseInt(this.thickness.split('px')[0]);
           let height = this.thickness;
-          console.log(this.thickness);
 
           bar.style.top = top + "px";
           bar.style.left = left + "px";
@@ -180,7 +176,6 @@ class resizeBox {
 
           // get all the containers that are in both handlers
           let containers = y_axis[i].containers.concat(y_axis[j].containers);
-          console.log(containers);
 
           // set the new containers
           y_axis[i].containers = containers;
@@ -212,7 +207,6 @@ class resizeBox {
 
           // get all the containers that are in both handlers
           let containers = x_axis[i].containers.concat(x_axis[j].containers);
-          console.log(containers);
 
           // set the new containers
           x_axis[i].containers = containers;
@@ -319,9 +313,6 @@ class resizeBox {
     });
 
     // if the handler already exists, return
-    // console.log(handler);
-    // console.log(handlers);
-    // console.log(boundrie);
     // swap side --> container are in the opposite side of the handler.
     if (side == "top") side = "bottom";
     else if (side == "bottom") side = "top";
@@ -591,14 +582,12 @@ class resizeBox {
       }
     };
 
-    console.log(this);
     const handlers_axis = [];
     handlers_axis.push(this.handle.xAxis); // push the x axis handlers
     handlers_axis.push(this.handle.yAxis); // push the y axis handlers
 
     // the colliding handlers only can be the ones that are on different axis.
 
-    console.log(handlers_axis);
     const collidingHandlers = [];
 
     // check if xAxis is colliding with yAxis
@@ -641,8 +630,6 @@ class resizeBox {
       });
     });
 
-    console.log("collidingHandlers");
-    console.log(collidingHandlers);
     return collidingHandlers;
   }
 
@@ -656,11 +643,9 @@ class resizeBox {
 
   setContainerOnHandlers() {
     // set the container on the handlers
-    console.log("setContainerOnHandlers");
     Object.keys(this.handle).forEach((axis) => {
       this.handle[axis].forEach((handle) => {
         handle.containers.forEach((container) => {
-          // console.log(container);
           container.element = document.getElementById(container.id);
         });
       });
@@ -671,8 +656,6 @@ class resizeBox {
     // get the mouse position
     const axis = e.target.getAttribute("data-axis");
     const index = e.target.getAttribute("data-index");
-
-    console.log(this);
 
     this.deltaPosMouse = {
       x: e.clientX,
@@ -708,10 +691,6 @@ class resizeBox {
   handleMouseMove(e) {
     if (!this.isDragging) return;
     // const { boundrie, containers } = this.draggingBar;
-    // console.log('isDragging', {
-    //   boundrie,
-    //   containers,
-    // });
 
     // get the mouse position
     const mousePos = [e.clientX - this.coords.x, e.clientY - this.coords.y];
@@ -731,9 +710,6 @@ class resizeBox {
     // vertical direction
     if (this.dirDrag === resizeBox.Direction.Vertical) {
       // move the bar
-      // console.log("move the bar");
-      // console.log(this.draggingBar.element.style.top);
-      // console.log(this.deltaPosMouse.y);
       let top =
         parseInt(this.draggingBar.element.style.top) + this.deltaPosMouse.y;
 
@@ -881,8 +857,6 @@ class resizeBox {
     this.dirDrag = null;
     this.draggingBar = null;
 
-    console.log("handleMouseUp", this);
-
     // Remove listener for mouse move on document
     document.removeEventListener("mousemove", (e) => {
       this.handleMouseMove(e);
@@ -892,8 +866,6 @@ class resizeBox {
   // listen to the resize event
   generateListeners() {
     let handlers = document.querySelectorAll(".resize-bar");
-    console.log(handlers);
-    console.log("box_type.dataset");
     handlers.forEach((handler) => {
       // click event on handle
       handler.addEventListener("mousedown", (e) => {

@@ -7,14 +7,10 @@ function Monaco() {
   );
 
   function handleOnChange(newValue, e) {
-    // console.log("onChange", e.changes);
-
     ApplyChanges(e.changes);
   }
 
   function ApplyChanges(changes) {
-    // console.log("ApplyChanges", changes);
-
     // variable aux to apply changes
     let code = innerCode;
 
@@ -28,12 +24,9 @@ function Monaco() {
 
     // update state
     setInnerCode(code);
-
-    console.log(code);
   }
 
   function handleOnMount(editor, monaco) {
-    console.log("onMount", monaco);
     // get current value
     console.log(editor.getValue());
   }

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import Container from "../Container";
+import Handler from "../Handler";
 
 const useLayout = (layout, options) => {
   const [minHeight, setMinHeightContainer] = useState(options.minHeight || 50);
@@ -10,7 +11,7 @@ const useLayout = (layout, options) => {
     width: parseInt(options.width) || 500,
     height: parseInt(options.height) || 500,
   });
-  const [thickness, setThickness] = useState(options.thickness || "4px");
+  const [thickness, setThickness] = useState(parseInt(options.thickness) || 4);
   const [sizeUnit, setSizeUnit] = useState({
     width: options.width.split(size.width)[1] || "rem",
     height: options.height.split(size.height)[1] || "rem",
@@ -39,8 +40,6 @@ const useLayout = (layout, options) => {
 
   let main_axis_x = 0;
   let main_axis_y = 0;
-
-  console.log(sizeUnit);
 
   const createLayout = (layout) => {
     // RULES:
@@ -111,8 +110,6 @@ const useLayout = (layout, options) => {
 
     // this._boxes = _boxes;
     // this.handle = handle;
-    console.log("_boxes", _boxes);
-    console.log("handle", _handle);
     // setBoxes(_boxes);
     // setHandlers(handle); // useState to save the handlers.
 
@@ -364,16 +361,9 @@ const useLayout = (layout, options) => {
         }
       }
     }
-
-    console.log("joinHandlers2", _handle);
   };
 
   const createContainer = (_boxes, _handle) => {
-    console.log("width: ", size.width);
-    console.log("height: ", size.height);
-    console.log("main_axis_y: ", main_axis_y);
-    console.log("main_axis_x: ", main_axis_x);
-
     width_boxes = size.width / main_axis_y;
     height_boxes = size.height / main_axis_x;
 
@@ -393,7 +383,7 @@ const useLayout = (layout, options) => {
       const _box = (
         <Container
           idContainer={key}
-          key={key}
+          key={`${key}`}
           className="resize-box"
           style={style_box}
         />
@@ -418,9 +408,6 @@ const useLayout = (layout, options) => {
           zIndex: 2,
         };
 
-        console.log("key", key);
-        console.log("thickness", thickness);
-
         if (key === "xAxis") {
           style.transform = "translateY(-50%)";
           style.top = handler.boundrie[0][0] * height_boxes;
@@ -437,13 +424,12 @@ const useLayout = (layout, options) => {
           style.width = thickness;
         }
 
-        style.top += "px";
-        style.left += "px";
-
-        console.log("style", style);
-
         let _bar = (
-          <div key={`res-bar-${index}`} className="resize-bar" style={style} />
+          <Handler
+            key={`res-bar-${index}`}
+            handlerKey={index}
+            handlerStyle={style}
+          />
         );
         index++;
         react_bars.push(_bar);
@@ -470,20 +456,12 @@ const useLayout = (layout, options) => {
   };
 
   const initLayout = () => {
-    console.log("initLayout");
-    // console.log(layout);
-    // console.log(options);
-
     const { _boxes, _handle } = createLayout(layout);
 
     // check if the layout is valid.
     if (!checkIsValidCorners(_boxes)) throw new Error("Invalid layout");
-    console.log("width_boxes", width_boxes);
-    console.log("height_boxes", height_boxes);
 
     joinHandlers(_handle);
-    console.log("width_boxes", width_boxes);
-    console.log("height_boxes", height_boxes);
     setWrapper(createContainer(_boxes, _handle));
   };
 

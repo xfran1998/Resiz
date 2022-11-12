@@ -63,8 +63,6 @@ export default class resizeBox {
     this.draggingBar = null;
 
     this.create_layout(layout);
-    // console.log(this.boxes);
-    // console.log(this.handle);
 
     // check if the layout is valid.
     if (!this.checkIsValidCorners(this.boxes))
@@ -79,7 +77,7 @@ export default class resizeBox {
     this.generateListeners();
   }
 
-  getContainers(){
+  getContainers() {
     return this.containers;
   }
 
@@ -123,7 +121,7 @@ export default class resizeBox {
       box.style.zIndex = "1";
 
       container.appendChild(box);
-      this.containers.push({id: key, box: box});
+      this.containers.push({ id: key, box: box });
     });
     this.mainContainer = container;
 
