@@ -376,21 +376,22 @@ const useLayout = (layout, options) => {
     width_boxes = size.width / main_axis_y;
     height_boxes = size.height / main_axis_x;
 
-    console.log("width_boxes: ", width_boxes);
-    console.log("height_boxes: ", height_boxes);
+    
     // create resizable boxes
-
     const react_containers = [];
     Object.keys(_boxes).forEach((key, index) => {
+      console.log("BOXES", _boxes[key]);
       const style_box = {
-        top: _boxes[key].top + height_boxes + "px",
-        left: _boxes[key].left + width_boxes + "px",
-        width: (_boxes[key].right - _boxes[key].left) * width_boxes + "px",
-        height: (_boxes[key].bottom - _boxes[key].top) * height_boxes + "px",
+        top: _boxes[key].top + height_boxes,
+        left: _boxes[key].left + width_boxes,
+        width: (_boxes[key].right - _boxes[key].left) * width_boxes,
+        height: (_boxes[key].bottom - _boxes[key].top) * height_boxes,
         position: "absolute",
         background: options.background || "red",
         zIndex: 1,
       };
+
+      console.log("style_bºox: ", style_box);
 
       let _box = (
         <Container
@@ -409,8 +410,9 @@ const useLayout = (layout, options) => {
 
     // create resizable bars
     const react_bars = [];
+    let index = 0;
     Object.keys(_handle).forEach((key) => {
-      _handle[key].forEach((handler, index) => {
+      _handle[key].forEach((handler) => {
         // let bar = document.createElement("div");
         let style = {
           position: "absolute",
@@ -474,7 +476,8 @@ const useLayout = (layout, options) => {
 
         let _bar = (
           <div key={`res-bar-${index}`} className="resize-bar" style={style} />
-        );
+          );
+        index++;
         react_bars.push(_bar);
       });
     });

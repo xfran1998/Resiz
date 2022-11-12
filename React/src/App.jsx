@@ -30,8 +30,8 @@ function App() {
       color: "#111",
       idWrapper: "test",
       background: "#ddd",
-      minHeight: 500,
-      minWidth: 500,
+      minHeight: 10,
+      minWidth: 10,
     },
   };
   return (
