@@ -376,14 +376,12 @@ const useLayout = (layout, options) => {
     width_boxes = size.width / main_axis_y;
     height_boxes = size.height / main_axis_x;
 
-    
     // create resizable boxes
     const react_containers = [];
     Object.keys(_boxes).forEach((key, index) => {
-      console.log("BOXES", _boxes[key]);
       const style_box = {
-        top: _boxes[key].top + height_boxes,
-        left: _boxes[key].left + width_boxes,
+        top: _boxes[key].top * height_boxes,
+        left: _boxes[key].left * width_boxes,
         width: (_boxes[key].right - _boxes[key].left) * width_boxes,
         height: (_boxes[key].bottom - _boxes[key].top) * height_boxes,
         position: "absolute",
@@ -391,9 +389,7 @@ const useLayout = (layout, options) => {
         zIndex: 1,
       };
 
-      console.log("style_bºox: ", style_box);
-
-      let _box = (
+      const _box = (
         <Container
           idContainer={key}
           key={key}
@@ -401,6 +397,7 @@ const useLayout = (layout, options) => {
           style={style_box}
         />
       );
+
       react_containers.push(_box);
     });
 
@@ -476,7 +473,7 @@ const useLayout = (layout, options) => {
 
         let _bar = (
           <div key={`res-bar-${index}`} className="resize-bar" style={style} />
-          );
+        );
         index++;
         react_bars.push(_bar);
       });

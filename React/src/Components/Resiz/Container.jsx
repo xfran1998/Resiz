@@ -3,10 +3,10 @@ import { useContainer } from "./Hooks/useContainer";
 
 function Container({ idContainer, background, zIndex, ...rest }) {
   console.log("rest: ", rest);
-  // const [height, setHeight] = useState(size.height);
-  // const [width, setWidth] = useState(size.width);
-  // const [top, setTop] = useState(size.top * size.height);
-  // const [left, setLeft] = useState(size.left * size.width);
+  const [height, setHeight] = useState(rest.height);
+  const [width, setWidth] = useState(rest.width);
+  const [top, setTop] = useState(rest.top * rest.height);
+  const [left, setLeft] = useState(rest.left * rest.width);
   const [id, setId] = useState(idContainer);
   const { style } = useContainer({
     idContainer,
@@ -20,7 +20,16 @@ function Container({ idContainer, background, zIndex, ...rest }) {
   }, []);
 
   return (
-    <div id={idContainer} className="resize-box" style={style}>
+    <div
+      id={idContainer}
+      className="resize-box"
+      style={{
+        ...style,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
       <h1>{idContainer}</h1>
     </div>
   );
